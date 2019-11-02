@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Annotation\ApiProperty;
 use ApiPlatform\Core\Annotation\ApiResource;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\NumericFilter;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
@@ -69,12 +70,14 @@ class VerificationRequest
     private $status;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @var MediaObject|null
      *
-     * @Assert\NotBlank()
+     * @ORM\ManyToOne(targetEntity=MediaObject::class)
+     * @ORM\JoinColumn(nullable=true)
+     * @ApiProperty(iri="http://schema.org/image")
      * @Groups({"user:read", "user:write"})
      */
-    private $image;
+    public $image;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
@@ -124,12 +127,12 @@ class VerificationRequest
         return $this;
     }
 
-    public function getImage(): ?string
+    public function getImage(): ?MediaObject
     {
-        return $this->message;
+        return $this->image;
     }
 
-    public function setImage(string $image): self
+    public function setImage(MediaObject $image): self
     {
         $this->image = $image;
 

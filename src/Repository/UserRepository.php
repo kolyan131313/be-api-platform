@@ -42,7 +42,6 @@ class UserRepository extends ServiceEntityRepository
         $user = new User();
         $user->setEmail($data['email'])
             ->setPassword($this->encoder->encodePassword($user, $data['password']))
-            ->setRoles([UserRolesEnum::USER])
             ->setFirstName($data['firstName'])
             ->setLastName($data['lastName']);
 
