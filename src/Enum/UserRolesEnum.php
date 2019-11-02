@@ -6,5 +6,5 @@ class UserRolesEnum
 {
     public const ADMIN = 'ROLE_ADMIN';
     public const BLOGGER = 'ROLE_BLOGGER';
-    public const USER = 'ROLE_USER';
+    public const SIMPLE_USER = 'ROLE_USER';
 }

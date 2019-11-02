@@ -3,18 +3,39 @@
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
+use App\Traits\TimestampableEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ApiResource(
- *     collectionOperations={"get", "post"},
- *     itemOperations={"put"}
+ *     collectionOperations={
+ *          "get"={
+ *              "security"="is_granted('ROLE_USER')"
+ *          },
+ *          "post"={
+ *              "security"="is_granted('ROLE_BLOGGER')"
+ *          }
+ *     },
+ *     itemOperations={
+ *          "put"={
+ *              "security"="is_granted('ROLE_BLOGGER')"
+ *          },
+ *          "get"={
+ *              "security"="is_granted('ROLE_USER')"
+ *          }
+ *     },
+ *     normalizationContext={"groups"={"user:read"}},
+ *     denormalizationContext={"groups"={"user:write"}}
  * )
  * @ORM\Entity(repositoryClass="App\Repository\PostRepository")
  */
 class Post
 {
+    use TimestampableEntity;
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -24,6 +45,7 @@ class Post
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"user:read", "user:write"})
      * @Assert\NotBlank()
      * @Assert\Length(min=1, max=255, maxMessage="Title length more than 255 chars")
      */
@@ -31,14 +53,17 @@ class Post
 
     /**
      * @ORM\Column(type="text")
+     * @Groups({"user:read", "user:write"})
      * @Assert\NotBlank()
      */
     private $content;
 
     /**
-     * @ORM\Column(type="datetime")
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="posts")
+     * @ORM\JoinColumn(nullable=false)
+     * @Gedmo\Blameable(on="create")
      */
-    private $date;
+    private $owner;
 
     public function getId(): ?int
     {
@@ -69,14 +94,14 @@ class Post
         return $this;
     }
 
-    public function getDate(): ?\DateTimeInterface
+    public function getOwner(): ?User
     {
-        return $this->date;
+        return $this->owner;
     }
 
-    public function setDate(\DateTimeInterface $date): self
+    public function setOwner(?User $owner): self
     {
-        $this->date = $date;
+        $this->owner = $owner;
 
         return $this;
     }

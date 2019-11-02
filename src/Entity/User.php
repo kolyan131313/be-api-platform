@@ -4,6 +4,9 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Enum\UserRolesEnum;
+use App\Traits\TimestampableEntity;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -11,15 +14,22 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
+ * @ORM\Table("`user`")
  * @ApiResource(
  *     collectionOperations={},
- *     itemOperations={"get"},
+ *     itemOperations={
+ *          "get"={
+ *              "security"="is_granted('ROLE_ADMIN')"
+ *          },
+ *     },
  *     normalizationContext={"groups"={"user:read"}},
  *     denormalizationContext={"groups"={"user:write"}}
  * )
  */
 class User implements UserInterface
 {
+    use TimestampableEntity;
+
     /**
      * @ORM\Id()
      * @ORM\GeneratedValue()
@@ -31,12 +41,13 @@ class User implements UserInterface
      * @ORM\Column(type="string", length=180, unique=true)
      * @Groups({"user:read", "user:write"})
      * @Assert\NotBlank()
+     * @Assert\Unique()
      * @Assert\Email()
      */
     private $email;
 
     /**
-     * @ORM\Column(type="json")
+     * @ORM\Column(type="json_array")
      */
     private $roles = [];
 
@@ -67,9 +78,15 @@ class User implements UserInterface
     private $verificationRequest;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true, unique=true)
+     * @ORM\OneToMany(targetEntity="App\Entity\Post", mappedBy="owner")
      */
-    private $apiToken;
+    private $posts;
+
+    public function __construct()
+    {
+        $this->roles[] = UserRolesEnum::SIMPLE_USER;
+        $this->posts = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -103,11 +120,7 @@ class User implements UserInterface
      */
     public function getRoles(): array
     {
-        $roles = $this->roles;
-
-        $roles[] = UserRolesEnum::USER;
-
-        return array_unique($roles);
+        return $this->roles;
     }
 
     public function setRoles(array $roles): self
@@ -117,9 +130,6 @@ class User implements UserInterface
         return $this;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function getPassword(): string
     {
         return (string) $this->password;
@@ -144,6 +154,9 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @see UserInterface
+     */
     public function getLastName(): ?string
     {
         return $this->lastName;
@@ -190,25 +203,32 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getApiToken(): ?string
+    /**
+     * @return Collection|Post[]
+     */
+    public function getPosts(): Collection
     {
-        return $this->apiToken;
+        return $this->posts;
     }
 
-    public function setApiToken(?string $apiToken): self
+    public function addPost(Post $post): self
     {
-        $this->apiToken = $apiToken ?? md5(uniqid(rand(), true));
+        if (!$this->posts->contains($post)) {
+            $this->posts[] = $post;
+            $post->setOwner($this);
+        }
 
         return $this;
     }
 
-    /**
-     * @ORM\PrePersist
-     */
-    public function generateToken(): self
+    public function removePost(Post $post): self
     {
-        if(!$this->apiToken) {
-            $this->apiToken = md5(uniqid(rand(), true));
+        if ($this->posts->contains($post)) {
+            $this->posts->removeElement($post);
+            // set the owning side to null (unless already changed)
+            if ($post->getOwner() === $this) {
+                $post->setOwner(null);
+            }
         }
 
         return $this;

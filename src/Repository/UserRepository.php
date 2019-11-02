@@ -3,10 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use App\Enum\UserRolesEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
@@ -16,9 +18,16 @@ use Doctrine\ORM\ORMException;
  */
 class UserRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    /**
+     * UserPasswordEncoderInterface $encoder
+     */
+    private $encoder;
+
+    public function __construct(ManagerRegistry $registry, UserPasswordEncoderInterface $encoder)
     {
         parent::__construct($registry, User::class);
+
+        $this->encoder = $encoder;
     }
 
     /**
@@ -32,40 +41,14 @@ class UserRepository extends ServiceEntityRepository
     {
         $user = new User();
         $user->setEmail($data['email'])
-            ->setPassword($data['password']);
+            ->setPassword($this->encoder->encodePassword($user, $data['password']))
+            ->setRoles([UserRolesEnum::USER])
+            ->setFirstName($data['firstName'])
+            ->setLastName($data['lastName']);
 
         $this->getEntityManager()->persist($user);
-        $this->getEntityManager()->flush($user);
+        $this->getEntityManager()->flush();
 
         return $user;
     }
-
-    // /**
-    //  * @return User[] Returns an array of User objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('u.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?User
-    {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }
