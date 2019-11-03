@@ -6,7 +6,7 @@ security:
     role_hierarchy:
         ROLE_USER: ROLE_USER
         ROLE_BLOGGER: ROLE_USER
-        ROLE_ADMIN: ROLE_BLOGGER
+        ROLE_ADMIN: [ROLE_USER, ROLE_BLOGGER]
 
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:

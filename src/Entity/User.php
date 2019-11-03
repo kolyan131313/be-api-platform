@@ -170,6 +170,16 @@ class User implements UserInterface
     }
 
     /**
+     * Get full name of user
+     *
+     * @return string
+     */
+    public function getFullName(): string
+    {
+        return sprintf('%s %s', $this->firstName, $this->lastName) ;
+    }
+
+    /**
      * @see UserInterface
      */
     public function getSalt()
@@ -225,12 +235,42 @@ class User implements UserInterface
     {
         if ($this->posts->contains($post)) {
             $this->posts->removeElement($post);
-            // set the owning side to null (unless already changed)
+
             if ($post->getOwner() === $this) {
                 $post->setOwner(null);
             }
         }
 
         return $this;
+    }
+
+    /**
+     * Check if owner is Simple user
+     *
+     * @return bool
+     */
+    public function isSimpleUser(): bool
+    {
+        return in_array(UserRolesEnum::SIMPLE_USER, $this->getRoles());
+    }
+
+    /**
+     * Check if owner is Blogger
+     *
+     * @return bool
+     */
+    public function isBlogger(): bool
+    {
+        return in_array(UserRolesEnum::BLOGGER, $this->getRoles());
+    }
+
+    /**
+     * Check if owner is Admin
+     *
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        return in_array(UserRolesEnum::ADMIN, $this->getRoles());
     }
 }

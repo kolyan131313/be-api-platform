@@ -1,0 +1,10 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Verified request was processed{% endblock %}
+
+{% block body %}
+<div class="row">
+    <h1>Hello {{ verificationRequest.owner.fullName }}! ✅</h1>
+    <div>Your verification request was processed and status was changed to {{ status }} </div>
+</div>
+{% endblock %}

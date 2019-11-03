@@ -38,3 +38,9 @@ services:
         class: App\Controller\AuthController
         arguments:
             - '@app.user.repository'
+
+    app.notification_manager.service:
+        class: App\Service\NotificationManager
+        arguments:
+            - '@mailer'
+            - '@templating'

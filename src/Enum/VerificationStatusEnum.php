@@ -16,4 +16,16 @@ class VerificationStatusEnum
             self::REJECTED => 'Rejected',
         ];
     }
+
+    /**
+     * Check if is finished status
+     *
+     * @param int $status
+     *
+     * @return bool
+     */
+    public static function isFinishedStatus(int $status): bool
+    {
+        return in_array($status, [self::APPROVED, self::REJECTED]);
+    }
 }

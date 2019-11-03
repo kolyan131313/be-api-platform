@@ -19,6 +19,7 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
  *     collectionOperations={
  *         "post"={
  *             "controller"=CreateMediaObjectAction::class,
+ *             "path"="/media-objects",
  *             "deserialize"=false,
  *             "security"="is_granted('ROLE_USER')",
  *             "validation_groups"={"media_object:create"},
@@ -40,10 +41,10 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
  *                 }
  *             }
  *         },
- *         "get"
+ *         "get"={"path"="/media-objects"}
  *     },
  *     itemOperations={
- *         "get"
+ *         "get"={"path"="/media-objects/{id}"}
  *     }
  * )
  * @ORM\Table("media_object")
