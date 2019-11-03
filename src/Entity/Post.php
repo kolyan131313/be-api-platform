@@ -27,8 +27,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
  *              "security"="is_granted('ROLE_USER')"
  *          }
  *     },
- *     normalizationContext={"groups"={"user:read"}},
- *     denormalizationContext={"groups"={"user:write"}}
+ *     normalizationContext={"groups"={"post:read"}},
+ *     denormalizationContext={"groups"={"post:write"}}
  * )
  * @ORM\Entity(repositoryClass="App\Repository\PostRepository")
  */
@@ -45,7 +45,7 @@ class Post
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"user:read", "user:write"})
+     * @Groups({"post:read", "post:write"})
      * @Assert\NotBlank()
      * @Assert\Length(min=1, max=255, maxMessage="Title length more than 255 chars")
      */
@@ -53,7 +53,7 @@ class Post
 
     /**
      * @ORM\Column(type="text")
-     * @Groups({"user:read", "user:write"})
+     * @Groups({"post:read", "post:write"})
      * @Assert\NotBlank()
      */
     private $content;

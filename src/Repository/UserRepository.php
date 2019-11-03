@@ -7,7 +7,6 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
@@ -17,33 +16,23 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
  */
 class UserRepository extends ServiceEntityRepository
 {
-    /**
-     * UserPasswordEncoderInterface $encoder
-     */
-    private $encoder;
-
-    public function __construct(ManagerRegistry $registry, UserPasswordEncoderInterface $encoder)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, User::class);
-
-        $this->encoder = $encoder;
     }
 
     /**
-     * Create a new user
-     * @param $data
+     * Save a new user
+     *
+     * @param User $user
+     *
      * @return User
+     *
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function createNewUser($data)
+    public function saveUser(User $user)
     {
-        $user = new User();
-        $user->setEmail($data['email'])
-            ->setPassword($this->encoder->encodePassword($user, $data['password']))
-            ->setFirstName($data['firstName'])
-            ->setLastName($data['lastName']);
-
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush();
 

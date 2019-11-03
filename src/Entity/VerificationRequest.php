@@ -29,16 +29,32 @@ use Gedmo\Mapping\Annotation as Gedmo;
  *     },
  *     itemOperations={
  *          "put"={
- *              "path"="/verification-request/{id}",
- *              "security"="is_granted('ROLE_USER') and object.getOwner() == user"
+ *              "path"="/verification-requests/{id}",
+ *              "security"="is_granted('ROLE_USER') and object.getOwner() == user",
  *          },
  *          "get"={
- *              "path"="/verification-request/{id}",
+ *              "path"="/verification-requests/{id}",
  *              "security"="is_granted('ROLE_USER') and object.getOwner() == user"
+ *          },
+ *          "approve_verifiaction_reuest"={
+ *              "method"="PUT",
+ *              "path"="verification-requests/{id}/approve",
+ *              "controller"=ApproveVerificationRequestAction::class,
+ *              "denormalization_context"={"groups"={"verifiaction_request:approve"}},
+ *              "swagger_context" = {
+ *                 "parameters" = {
+ *                     {
+ *                         "name" = "email",
+ *                         "in" = "path",
+ *                         "required" = "true",
+ *                         "type" = "string"
+ *                     }
+ *                 },
+ *              }
  *          }
  *     },
- *     normalizationContext={"groups"={"user:read"}},
- *     denormalizationContext={"groups"={"user:write"}}
+ *     normalizationContext={"groups"={"verifiaction_request:read"}},
+ *     denormalizationContext={"groups"={"verifiaction_request:write"}}
  * )
  *
  * @ORM\Entity(repositoryClass="App\Repository\VerificationRequestRepository")
@@ -64,7 +80,7 @@ class VerificationRequest
 
     /**
      * @ORM\Column(type="smallint")
-     * @Groups({"user:read"})
+     * @Groups({"verifiaction_request:read"})
      * @Assert\NotBlank()
      */
     private $status;
@@ -75,20 +91,20 @@ class VerificationRequest
      * @ORM\ManyToOne(targetEntity=MediaObject::class)
      * @ORM\JoinColumn(nullable=true)
      * @ApiProperty(iri="http://schema.org/image")
-     * @Groups({"user:read", "user:write"})
+     * @Groups({"verifiaction_request:read", "verifiaction_request:write"})
      */
     public $image;
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Groups({"user:read", "user:write"})
+     * @Groups({"verifiaction_request:read", "verifiaction_request:write"})
      */
     private $message;
 
     /**
      * @ORM\OneToOne(targetEntity="App\Entity\User", inversedBy="verificationRequest", cascade={"persist", "remove"})
      * @ORM\JoinColumn(nullable=false)
-     * @Groups({"user:read"})
+     * @Groups({"verifiaction_request:read"})
      * @Gedmo\Blameable(on="create")
      */
     private $owner;

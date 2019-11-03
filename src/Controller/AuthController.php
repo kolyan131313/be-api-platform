@@ -2,52 +2,56 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Repository\UserRepository;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
+use App\Service\UserService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Annotation\Route;
+use Throwable;
 
 class AuthController extends AbstractController
 {
     /**
-     * @var UserRepository $userRepository
+     * @var UserRepository $userService
      */
-    private $userRepository;
+    private $userService;
 
     /**
      * AuthController Constructor
      *
-     * @param UserRepository $userRepository
+     * @param UserService $userService
      */
-    public function __construct(UserRepository $userRepository)
+    public function __construct(UserService $userService)
     {
-        $this->userRepository = $userRepository;
+        $this->userService = $userService;
     }
 
     /**
      * Register new user
      *
-     * @Route("/api/register", name="register", methods={"POST"})
+     * @Route("/api/register", name="api_register", methods={"POST"})
      *
      * @param Request $request
      *
-     * @return Response
+     * @return JsonResponse
      *
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
-    public function register(Request $request)
+    public function register(Request $request): JsonResponse
     {
-        $newUserData['email'] = $request->get('email');
-        $newUserData['password'] = $request->get('password');
-        $newUserData['firstName'] = $request->get('firstName');
-        $newUserData['lastName'] = $request->get('lastName');
+        try {
+            $data = $this->userService->prepareUserData($request);
+            /** @var User $user */
+            $user = $this->userService->createUser($data);
+        } catch (Throwable $exception) {
+            throw new BadRequestHttpException('Invalid registration request data');
+        }
 
-        $user = $this->userRepository->createNewUser($newUserData);
-
-        return new Response(sprintf('User %s successfully created', $user->getUsername()));
+        return new JsonResponse([
+            'code' => JsonResponse::HTTP_CREATED,
+            'email' => $user->getUsername()
+        ], JsonResponse::HTTP_CREATED);
     }
 }

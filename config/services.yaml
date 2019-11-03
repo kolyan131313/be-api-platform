@@ -15,7 +15,7 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/*'
-        exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
+        exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Service,Factory,Kernel.php}'
 
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
@@ -30,17 +30,29 @@ services:
     app.user.repository:
         class: App\Repository\UserRepository
         arguments:
-            - Symfony\Bridge\Doctrine\RegistryInterface
-            - Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface
+            - '@doctrine'
 
     # Controllers
     app.auth.controller:
         class: App\Controller\AuthController
         arguments:
-            - '@app.user.repository'
+            - '@app.user.service'
 
+    #Services
     app.notification_manager.service:
         class: App\Service\NotificationManager
         arguments:
             - '@mailer'
             - '@templating'
+
+    App\Service\NotificationManager: '@app.notification_manager.service'
+
+    app.user.service:
+        class: App\Service\UserService
+        arguments:
+            - '@doctrine.orm.entity_manager'
+            - '@security.password_encoder'
+            - '@app.user.repository'
+
+    App\Service\UserService: '@app.user.service'
+
