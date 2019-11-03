@@ -31,7 +31,7 @@ class UserRepository extends ServiceEntityRepository
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function save(User $user)
+    public function save(User $user): User
     {
         $this->getEntityManager()->persist($user);
         $this->getEntityManager()->flush($user);
