@@ -5,7 +5,6 @@ namespace App\Service;
 use App\Factory\UserFactory;
 use App\Entity\User;
 use App\Repository\UserRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,23 +18,13 @@ class UserService
     private $encoder;
 
     /**
-     * EntityManager $entityManager
-     */
-    private $entityManager;
-
-    /**
      * UserRepository $userRepository
      */
     private $userRepository;
 
-    public function __construct(
-        EntityManagerInterface $entityManager,
-        UserPasswordEncoderInterface $encoder,
-        UserRepository $userRepository
-    )
+    public function __construct(UserPasswordEncoderInterface $encoder, UserRepository $userRepository)
     {
         $this->encoder = $encoder;
-        $this->entityManager = $entityManager;
         $this->userRepository = $userRepository;
     }
 
@@ -48,12 +37,12 @@ class UserService
      */
     public function prepareUserData(Request $request): array
     {
-         $userData['email'] = $request->get('email');
-         $userData['password'] = $request->get('password');
-         $userData['firstName'] = $request->get('firstName');
-         $userData['lastName'] = $request->get('lastName');
+        $userData['email'] = $request->get('email');
+        $userData['password'] = $request->get('password');
+        $userData['firstName'] = $request->get('firstName');
+        $userData['lastName'] = $request->get('lastName');
 
-         return $userData;
+        return $userData;
     }
 
     /**
@@ -71,6 +60,6 @@ class UserService
         /** @var User $user */
         $user = UserFactory::make($userData, $this->encoder);
 
-        return $this->userRepository->saveUser($user);
+        return $this->userRepository->save($user);
     }
 }

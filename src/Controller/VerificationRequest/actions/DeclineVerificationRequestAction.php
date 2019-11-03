@@ -7,7 +7,7 @@ use App\Service\VerificationRequestService;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Throwable;
 
-final class ApproveVerificationRequestAction
+final class DeclineVerificationRequestAction
 {
     /**
      * @var VerificationRequestService
@@ -22,9 +22,9 @@ final class ApproveVerificationRequestAction
     public function __invoke(VerificationRequest $data): VerificationRequest
     {
         try {
-            $this->verificationRequestService->approve($data);
+            $this->verificationRequestService->decline($data);
         } catch (Throwable $exception) {
-            throw new BadRequestHttpException('Approve process is failed');
+            throw new BadRequestHttpException('Decline process is failed');
         }
 
         return $data;

@@ -4,16 +4,16 @@ namespace App\Enum;
 
 class VerificationStatusEnum
 {
-    public const REQUESTED = 0;
+    public const VERIFICATION_REQUESTED = 0;
     public const APPROVED = 1;
-    public const REJECTED = 2;
+    public const DECLINED = 2;
 
     public static function getLabels(): array
     {
         return [
-            self::REQUESTED => 'Requested',
+            self::VERIFICATION_REQUESTED => 'Verification requested',
             self::APPROVED => 'Approved',
-            self::REJECTED => 'Rejected',
+            self::DECLINED => 'Declined',
         ];
     }
 
@@ -26,6 +26,6 @@ class VerificationStatusEnum
      */
     public static function isFinishedStatus(int $status): bool
     {
-        return in_array($status, [self::APPROVED, self::REJECTED]);
+        return in_array($status, [self::APPROVED, self::DECLINED]);
     }
 }

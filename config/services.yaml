@@ -15,7 +15,7 @@ services:
     # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/*'
-        exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Service,Factory,Kernel.php}'
+        exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Service,Factory,Exception,Kernel.php}'
 
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
@@ -29,6 +29,11 @@ services:
     # Repositories
     app.user.repository:
         class: App\Repository\UserRepository
+        arguments:
+            - '@doctrine'
+
+    app.verification_request.repository:
+        class: App\Repository\VerificationRequestRepository
         arguments:
             - '@doctrine'
 
@@ -54,5 +59,12 @@ services:
             - '@security.password_encoder'
             - '@app.user.repository'
 
+    app.verification_request.service:
+        class: App\Service\VerificationRequestService
+        arguments:
+            - '@app.user.repository'
+            - '@app.verification_request.repository'
+
     App\Service\UserService: '@app.user.service'
+    App\Service\VerificationRequestService: '@app.verification_request.service'
 

@@ -22,7 +22,7 @@ class UserRepository extends ServiceEntityRepository
     }
 
     /**
-     * Save a new user
+     * Save a user
      *
      * @param User $user
      *
@@ -31,10 +31,10 @@ class UserRepository extends ServiceEntityRepository
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function saveUser(User $user)
+    public function save(User $user)
     {
         $this->getEntityManager()->persist($user);
-        $this->getEntityManager()->flush();
+        $this->getEntityManager()->flush($user);
 
         return $user;
     }

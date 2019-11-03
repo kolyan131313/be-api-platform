@@ -14,6 +14,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use App\Controller\VerificationRequest\actions\ApproveVerificationRequestAction;
+use App\Controller\VerificationRequest\actions\DeclineVerificationRequestAction;
 
 /**
  * @ApiResource(
@@ -34,27 +36,31 @@ use Gedmo\Mapping\Annotation as Gedmo;
  *          },
  *          "get"={
  *              "path"="/verification-requests/{id}",
- *              "security"="is_granted('ROLE_USER') and object.getOwner() == user"
+ *              "security"="is_granted('ROLE_USER') and object.getOwner() == user and object.getStatus() = 0"
  *          },
- *          "approve_verifiaction_reuest"={
+ *          "approve_verifiaction_request"={
  *              "method"="PUT",
  *              "path"="verification-requests/{id}/approve",
  *              "controller"=ApproveVerificationRequestAction::class,
- *              "denormalization_context"={"groups"={"verifiaction_request:approve"}},
- *              "swagger_context" = {
- *                 "parameters" = {
- *                     {
- *                         "name" = "email",
- *                         "in" = "path",
- *                         "required" = "true",
- *                         "type" = "string"
- *                     }
- *                 },
- *              }
+ *              "security"="is_granted('ROLE_ADMIN')",
+ *              "denormalization_context"={"groups"={"verifiaction_request:approve"}}
+ *          },
+ *          "decline_verifiaction_request"={
+ *              "method"="PUT",
+ *              "path"="verification-requests/{id}/decline",
+ *              "controller"=DeclineVerificationRequestAction::class,
+ *              "security"="is_granted('ROLE_ADMIN')",
+ *              "denormalization_context"={"groups"={"verifiaction_request:decline"}}
  *          }
  *     },
  *     normalizationContext={"groups"={"verifiaction_request:read"}},
- *     denormalizationContext={"groups"={"verifiaction_request:write"}}
+ *     denormalizationContext={
+ *          "groups"={
+ *              "verifiaction_request:write",
+ *              "verifiaction_request:decline",
+ *              "verifiaction_request:approve"
+ *          }
+ *     }
  * )
  *
  * @ORM\Entity(repositoryClass="App\Repository\VerificationRequestRepository")
@@ -66,6 +72,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
  *     "owner.lastName": "partial"
  * })
  * @ApiFilter(OrderFilter::class, properties={"createdAt"})
+ * @ORM\HasLifecycleCallbacks
  */
 class VerificationRequest
 {
@@ -102,6 +109,12 @@ class VerificationRequest
     private $message;
 
     /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     * @Groups({"verifiaction_request:decline", "verifiaction_request:read"})
+     */
+    private $rejectionReason;
+
+    /**
      * @ORM\OneToOne(targetEntity="App\Entity\User", inversedBy="verificationRequest", cascade={"persist", "remove"})
      * @ORM\JoinColumn(nullable=false)
      * @Groups({"verifiaction_request:read"})
@@ -111,7 +124,7 @@ class VerificationRequest
 
     public function __construct()
     {
-        $this->status = VerificationStatusEnum::REQUESTED;
+        $this->status = VerificationStatusEnum::VERIFICATION_REQUESTED;
     }
 
     public function getId(): ?int
@@ -163,6 +176,18 @@ class VerificationRequest
     public function setOwner(User $owner): self
     {
         $this->owner = $owner;
+
+        return $this;
+    }
+
+    public function getRejectionReason(): ?string
+    {
+        return $this->rejectionReason;
+    }
+
+    public function setRejectionReason(?string $rejectionReason): self
+    {
+        $this->rejectionReason = $rejectionReason;
 
         return $this;
     }

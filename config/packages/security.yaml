@@ -8,7 +8,6 @@ security:
         ROLE_BLOGGER: ROLE_USER
         ROLE_ADMIN: [ROLE_USER, ROLE_BLOGGER]
 
-    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
         # used to reload user from session & other features (e.g. switch_user)
         app_user_provider:
