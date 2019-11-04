@@ -15,12 +15,16 @@
         "symfony/framework-bundle": "4.3.*",
         "symfony/swiftmailer-bundle": "^3.3",
         "symfony/yaml": "4.3.*",
-        "vich/uploader-bundle": "^1.10"
+        "vich/uploader-bundle": "^1.10",
+        "ext-json": "*"
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.2",
+        "justinrainbow/json-schema": "^5.2",
+        "symfony/http-client": "4.3.*",
         "symfony/maker-bundle": "^1.14",
-        "symfony/profiler-pack": "^1.0"
+        "symfony/profiler-pack": "^1.0",
+        "symfony/test-pack": "^1.0"
     },
     "config": {
         "preferred-install": {

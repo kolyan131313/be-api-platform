@@ -43,15 +43,20 @@ class AuthController extends AbstractController
     {
         try {
             $data = $this->userService->prepareUserData($request);
+
             /** @var User $user */
             $user = $this->userService->createUser($data);
         } catch (Throwable $exception) {
             throw new BadRequestHttpException('Invalid registration request data');
         }
 
-        return new JsonResponse([
-            'code' => JsonResponse::HTTP_CREATED,
-            'email' => $user->getUsername()
-        ], JsonResponse::HTTP_CREATED);
+        return new JsonResponse(
+            [
+                'code' => JsonResponse::HTTP_CREATED,
+                'email' => $user->getUsername()
+            ],
+            JsonResponse::HTTP_CREATED,
+            ['Content-type' => 'application/json']
+        );
     }
 }

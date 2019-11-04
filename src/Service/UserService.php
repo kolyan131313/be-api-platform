@@ -37,12 +37,7 @@ class UserService
      */
     public function prepareUserData(Request $request): array
     {
-        $userData['email'] = $request->get('email');
-        $userData['password'] = $request->get('password');
-        $userData['firstName'] = $request->get('firstName');
-        $userData['lastName'] = $request->get('lastName');
-
-        return $userData;
+        return (array)json_decode($request->getContent());
     }
 
     /**
@@ -61,5 +56,19 @@ class UserService
         $user = UserFactory::make($userData, $this->encoder);
 
         return $this->userRepository->save($user);
+    }
+
+    /**
+     * Check if user exist
+     *
+     * @param array $userData
+     *
+     * @return User
+     */
+    public function existUser(array $userData): ?User
+    {
+        $email = $userData['email'] ?? '';
+
+        return $this->userRepository->findOneBy(['email' => $email]);
     }
 }

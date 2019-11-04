@@ -55,7 +55,6 @@ services:
     app.user.service:
         class: App\Service\UserService
         arguments:
-            - '@doctrine.orm.entity_manager'
             - '@security.password_encoder'
             - '@app.user.repository'
 

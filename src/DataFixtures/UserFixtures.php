@@ -10,24 +10,30 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserFixtures extends Fixture
 {
-    private const DEFAULT_PASSWORD = 'secret12345';
+    public const USER_REFERENCE = 'user';
+    public const DEFAULT_PASSWORD = 'secret12345';
+    public const SIMPLE_USER_EMAIL = 'simple_user@test.com';
+    public const BLOGGER_USER_EMAIL = 'blogger_user@test.com';
+    public const ADMIN_USER_EMAIL = 'admin_user@test.com';
+    public const WRONG_USER_EMAIL = 'admin_user@test.com';
+
     private const USERS = [
         [
-            'email' => 'simple_user@test.com',
+            'email' => self::SIMPLE_USER_EMAIL,
             'password' => self::DEFAULT_PASSWORD,
             'roles' => [UserRolesEnum::SIMPLE_USER],
             'firstName' => 'Simple',
             'lastName' => 'User',
         ],
         [
-            'email' => 'blogger_user@test.com',
+            'email' => self::BLOGGER_USER_EMAIL,
             'password' => self::DEFAULT_PASSWORD,
             'roles' => [UserRolesEnum::BLOGGER],
             'firstName' => 'Blogger',
             'lastName' => 'User',
         ],
         [
-            'email' => 'admin_user@test.com',
+            'email' => self::ADMIN_USER_EMAIL,
             'password' => self::DEFAULT_PASSWORD,
             'roles' => [UserRolesEnum::ADMIN],
             'firstName' => 'Admin',
@@ -45,7 +51,7 @@ class UserFixtures extends Fixture
         $this->passwordEncoder = $passwordEncoder;
     }
 
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         foreach (self::USERS as $userData) {
             $user = new User();
