@@ -10,26 +10,31 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Event\ViewEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Vich\UploaderBundle\Storage\StorageInterface;
 
 final class StatusVerificationRequestSubscriber implements EventSubscriberInterface
 {
-    /**
-     * @var StorageInterface
-     */
-    private $storage;
-
     /**
      * @var NotificationManager
      */
     private $notificationManager;
 
-    public function __construct(StorageInterface $storage, NotificationManager $notificationManager)
+    /**
+     * @var VerificationStatusEnum
+     */
+    private $verificationStatusEnum;
+
+    public function __construct(
+        NotificationManager $notificationManager,
+        VerificationStatusEnum $verificationStatusEnum
+    )
     {
-        $this->storage = $storage;
         $this->notificationManager = $notificationManager;
+        $this->verificationStatusEnum = $verificationStatusEnum;
     }
 
+    /**
+     * @return array
+     */
     public static function getSubscribedEvents(): array
     {
         return [
@@ -39,6 +44,11 @@ final class StatusVerificationRequestSubscriber implements EventSubscriberInterf
         ];
     }
 
+    /**
+     * Send email after finalization
+     *
+     * @param ViewEvent $event
+     */
     public function onPostWrite(ViewEvent $event): void
     {
         $object = $event->getControllerResult();
@@ -48,7 +58,7 @@ final class StatusVerificationRequestSubscriber implements EventSubscriberInterf
             return;
         }
 
-        if (VerificationStatusEnum::isFinishedStatus($object->getStatus())) {
+        if ($this->verificationStatusEnum->isFinishedStatus($object->getStatus())) {
             $this->notificationManager->notifyOnRequestStatusFinalized($object);
         }
     }

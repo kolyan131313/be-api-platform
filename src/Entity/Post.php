@@ -65,16 +65,27 @@ class Post
      */
     private $owner;
 
+    /**
+     * @return int|null
+     */
     public function getId(): ?int
     {
         return $this->id;
     }
 
+    /**
+     * @return string|null
+     */
     public function getTitle(): ?string
     {
         return $this->title;
     }
 
+    /**
+     * @param string $title
+     *
+     * @return $this
+     */
     public function setTitle(string $title): self
     {
         $this->title = $title;
@@ -82,11 +93,19 @@ class Post
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getContent(): ?string
     {
         return $this->content;
     }
 
+    /**
+     * @param string $content
+     *
+     * @return $this
+     */
     public function setContent(string $content): self
     {
         $this->content = $content;
@@ -94,11 +113,19 @@ class Post
         return $this;
     }
 
+    /**
+     * @return User|null
+     */
     public function getOwner(): ?User
     {
         return $this->owner;
     }
 
+    /**
+     * @param User|null $owner
+     *
+     * @return $this
+     */
     public function setOwner(?User $owner): self
     {
         $this->owner = $owner;

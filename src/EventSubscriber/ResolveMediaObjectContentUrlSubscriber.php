@@ -13,6 +13,9 @@ use Vich\UploaderBundle\Storage\StorageInterface;
 
 final class ResolveMediaObjectContentUrlSubscriber implements EventSubscriberInterface
 {
+    /**
+     * @var StorageInterface
+     */
     private $storage;
 
     public function __construct(StorageInterface $storage)
@@ -20,6 +23,9 @@ final class ResolveMediaObjectContentUrlSubscriber implements EventSubscriberInt
         $this->storage = $storage;
     }
 
+    /**
+     * @return array
+     */
     public static function getSubscribedEvents(): array
     {
         return [
@@ -27,6 +33,11 @@ final class ResolveMediaObjectContentUrlSubscriber implements EventSubscriberInt
         ];
     }
 
+    /**
+     * File upload check data
+     *
+     * @param ViewEvent $event
+     */
     public function onPreSerialize(ViewEvent $event): void
     {
         $controllerResult = $event->getControllerResult();

@@ -1,30 +1,40 @@
 <?php declare(strict_types=1);
 
-namespace App\Controller\VerificationRequest\actions;
+namespace App\Controller\VerificationRequest;
 
 use App\Entity\VerificationRequest;
 use App\Service\VerificationRequestService;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Throwable;
 
-final class ApproveVerificationRequestAction
+final class DeclineVerificationRequestAction
 {
     /**
      * @var VerificationRequestService
      */
     private $verificationRequestService;
 
+    /**
+     * DeclineVerificationRequestAction constructor.
+     *
+     * @param VerificationRequestService $verificationRequestService
+     */
     public function __construct(VerificationRequestService $verificationRequestService)
     {
         $this->verificationRequestService = $verificationRequestService;
     }
 
+    /**
+     * @param VerificationRequest $data
+     *
+     * @return VerificationRequest
+     */
     public function __invoke(VerificationRequest $data): VerificationRequest
     {
         try {
-            $this->verificationRequestService->approve($data);
+            $this->verificationRequestService->decline($data);
         } catch (Throwable $exception) {
-            throw new BadRequestHttpException('Approve process is failed');
+            throw new BadRequestHttpException('Decline process is failed');
         }
 
         return $data;

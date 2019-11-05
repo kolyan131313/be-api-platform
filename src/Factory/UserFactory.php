@@ -8,16 +8,24 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 class UserFactory
 {
     /**
+     * @var UserPasswordEncoderInterface
+     */
+    private $userPasswordEncoder;
+
+    public function __construct(UserPasswordEncoderInterface $userPasswordEncoder)
+    {
+        $this->userPasswordEncoder = $userPasswordEncoder;
+    }
+
+    /**
      * @param array $data
-     *
-     * @param UserPasswordEncoderInterface $userPasswordEncoder
      *
      * @return User
      */
-    public static function make(array $data, UserPasswordEncoderInterface $userPasswordEncoder): User
+    public function make(array $data): User
     {
         $user = new User();
-        $encodedPassword = $userPasswordEncoder->encodePassword($user, $data['password']);
+        $encodedPassword = $this->userPasswordEncoder->encodePassword($user, $data['password']);
         $user->setEmail($data['email'])
             ->setPassword($encodedPassword)
             ->setFirstName($data['firstName'])

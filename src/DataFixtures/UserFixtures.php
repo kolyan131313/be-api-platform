@@ -15,7 +15,6 @@ class UserFixtures extends Fixture
     public const SIMPLE_USER_EMAIL = 'simple_user@test.com';
     public const BLOGGER_USER_EMAIL = 'blogger_user@test.com';
     public const ADMIN_USER_EMAIL = 'admin_user@test.com';
-    public const WRONG_USER_EMAIL = 'admin_user@test.com';
 
     private const USERS = [
         [
@@ -51,15 +50,21 @@ class UserFixtures extends Fixture
         $this->passwordEncoder = $passwordEncoder;
     }
 
+    /**
+     * @param ObjectManager $manager
+     */
     public function load(ObjectManager $manager): void
     {
-        foreach (self::USERS as $userData) {
+        foreach (self::USERS as $k => $userData) {
             $user = new User();
             $user->setEmail($userData['email']);
             $user->setFirstName($userData['firstName']);
             $user->setLastName($userData['lastName']);
             $user->setPassword($this->passwordEncoder->encodePassword($user, $userData['password']));
             $user->setRoles($userData['roles']);
+
+            $reference = sprintf('%s_%d', self::USER_REFERENCE, $k);
+            $this->addReference($reference, $user);
 
             $manager->persist($user);
         }

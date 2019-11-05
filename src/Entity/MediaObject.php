@@ -7,7 +7,7 @@ use App\Traits\TimestampableEntity;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Core\Annotation\ApiProperty;
 use Symfony\Component\HttpFoundation\File\File;
-use App\Controller\MediaObject\actions\CreateMediaObjectAction;
+use App\Controller\MediaObject\CreateMediaObjectAction;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
@@ -85,8 +85,31 @@ class MediaObject
      */
     public $filePath;
 
+    /**
+     * @return int|null
+     */
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getFilePath(): ?string
+    {
+        return $this->filePath;
+    }
+
+    /**
+     * @param string $filePath
+     *
+     * @return $this
+     */
+    public function setFilePath(string $filePath): self
+    {
+        $this->filePath = $filePath;
+
+        return $this;
     }
 }

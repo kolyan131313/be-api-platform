@@ -12,4 +12,4 @@ Create databases for local environment and test environment
 for example: be_api_platform
 
 #Run tests
-php bin/console doctrine:fixtures:load
+./bin/console doctrine:migrations:migrate --env=test --dry-run

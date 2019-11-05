@@ -8,6 +8,7 @@ use App\Entity\User;
 use App\Enum\VerificationStatusEnum;
 use App\Repository\UserRepository;
 use App\Repository\VerificationRequestRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 
@@ -23,13 +24,20 @@ class VerificationRequestService
      */
     private $verificationRequestRepository;
 
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+
     public function __construct(
         UserRepository $userRepository,
-        VerificationRequestRepository $verificationRequestRepository
+        VerificationRequestRepository $verificationRequestRepository,
+        EntityManagerInterface $entityManager
     )
     {
         $this->userRepository = $userRepository;
         $this->verificationRequestRepository = $verificationRequestRepository;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -47,13 +55,12 @@ class VerificationRequestService
         /** @var User $user */
         $user = $verificationRequest->getOwner();
 
-        if (!$user->isAdmin()) {
+        if (!in_array(UserRolesEnum::ADMIN, $user->getRoles())) {
             $user->setRoles([UserRolesEnum::BLOGGER]);
-            $this->userRepository->save($user);
         }
 
         $verificationRequest->setStatus(VerificationStatusEnum::APPROVED);
-        $this->verificationRequestRepository->save($verificationRequest);
+        $this->entityManager->flush();
     }
 
     /**
@@ -69,6 +76,6 @@ class VerificationRequestService
     public function decline(VerificationRequest $verificationRequest): void
     {
         $verificationRequest->setStatus(VerificationStatusEnum::DECLINED);
-        $this->verificationRequestRepository->save($verificationRequest);
+        $this->entityManager->flush();
     }
 }

@@ -2,12 +2,9 @@
 
 namespace App\Service;
 
-use App\Factory\UserFactory;
 use App\Entity\User;
 use App\Repository\UserRepository;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
-use Symfony\Component\HttpFoundation\Request;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class UserService
@@ -22,53 +19,34 @@ class UserService
      */
     private $userRepository;
 
-    public function __construct(UserPasswordEncoderInterface $encoder, UserRepository $userRepository)
+    /**
+     * Enti $entityManager
+     */
+    private $entityManager;
+
+    public function __construct(
+        UserPasswordEncoderInterface $encoder,
+        UserRepository $userRepository,
+        EntityManagerInterface $entityManager
+    )
     {
         $this->encoder = $encoder;
         $this->userRepository = $userRepository;
-    }
-
-    /**
-     * Prepare user data
-     *
-     * @param Request $request
-     *
-     * @return array
-     */
-    public function prepareUserData(Request $request): array
-    {
-        return (array)json_decode($request->getContent());
+        $this->entityManager = $entityManager;
     }
 
     /**
      * Create user for registration
      *
-     * @param array $userData
-     *
-     * @return User
-     *
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function createUser(array $userData): User
-    {
-        /** @var User $user */
-        $user = UserFactory::make($userData, $this->encoder);
-
-        return $this->userRepository->save($user);
-    }
-
-    /**
-     * Check if user exist
-     *
-     * @param array $userData
+     * @param User $user
      *
      * @return User
      */
-    public function existUser(array $userData): ?User
+    public function createUser(User $user): User
     {
-        $email = $userData['email'] ?? '';
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
 
-        return $this->userRepository->findOneBy(['email' => $email]);
+        return $user;
     }
 }

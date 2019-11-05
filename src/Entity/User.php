@@ -11,6 +11,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
@@ -29,6 +30,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *     normalizationContext={"groups"={"user:read"}},
  *     denormalizationContext={"groups"={"user:write"}}
  * )
+ * @UniqueEntity(fields={"email"}, message="It looks like your already have an account!")
  */
 class User implements UserInterface
 {
@@ -45,7 +47,6 @@ class User implements UserInterface
      * @ORM\Column(type="string", length=180, unique=true)
      * @Groups({"user:read", "user:write"})
      * @Assert\NotBlank()
-     * @Assert\Unique()
      * @Assert\Email()
      */
     private $email;
@@ -77,7 +78,7 @@ class User implements UserInterface
     private $lastName;
 
     /**
-     * @ORM\OneToOne(targetEntity="App\Entity\VerificationRequest", mappedBy="owner", cascade={"persist", "remove"})
+     * @ORM\OneToMany(targetEntity="App\Entity\VerificationRequest", mappedBy="owner")
      */
     private $verificationRequest;
 
@@ -92,16 +93,27 @@ class User implements UserInterface
         $this->posts = new ArrayCollection();
     }
 
+    /**
+     * @return int|null
+     */
     public function getId(): ?int
     {
         return $this->id;
     }
 
+    /**
+     * @return string|null
+     */
     public function getEmail(): ?string
     {
         return $this->email;
     }
 
+    /**
+     * @param string $email
+     *
+     * @return $this
+     */
     public function setEmail(string $email): self
     {
         $this->email = $email;
@@ -116,7 +128,7 @@ class User implements UserInterface
      */
     public function getUsername(): string
     {
-        return (string) $this->email;
+        return (string)$this->email;
     }
 
     /**
@@ -127,6 +139,11 @@ class User implements UserInterface
         return $this->roles;
     }
 
+    /**
+     * @param array $roles
+     *
+     * @return $this
+     */
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;
@@ -134,11 +151,19 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getPassword(): string
     {
-        return (string) $this->password;
+        return (string)$this->password;
     }
 
+    /**
+     * @param string $password
+     *
+     * @return $this
+     */
     public function setPassword(string $password): self
     {
         $this->password = $password;
@@ -146,11 +171,19 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getFirstName(): ?string
     {
         return $this->firstName;
     }
 
+    /**
+     * @param string $firstName
+     *
+     * @return $this
+     */
     public function setFirstName(string $firstName): self
     {
         $this->firstName = $firstName;
@@ -166,6 +199,11 @@ class User implements UserInterface
         return $this->lastName;
     }
 
+    /**
+     * @param string $lastName
+     *
+     * @return $this
+     */
     public function setLastName(string $lastName): self
     {
         $this->lastName = $lastName;
@@ -180,28 +218,41 @@ class User implements UserInterface
      */
     public function getFullName(): string
     {
-        return sprintf('%s %s', $this->firstName, $this->lastName) ;
+        return sprintf('%s %s', $this->firstName, $this->lastName);
     }
 
     /**
+     * @return string
      * @see UserInterface
+     *
      */
-    public function getSalt(): void
+    public function getSalt(): string
     {
+        return md5(uniqid());
     }
 
     /**
+     * @return void
      * @see UserInterface
+     *
      */
     public function eraseCredentials(): void
     {
     }
 
+    /**
+     * @return VerificationRequest|null
+     */
     public function getVerificationRequest(): ?VerificationRequest
     {
         return $this->verificationRequest;
     }
 
+    /**
+     * @param VerificationRequest $verificationRequest
+     *
+     * @return $this
+     */
     public function setVerificationRequest(VerificationRequest $verificationRequest): self
     {
         $this->verificationRequest = $verificationRequest;
@@ -222,6 +273,11 @@ class User implements UserInterface
         return $this->posts;
     }
 
+    /**
+     * @param Post $post
+     *
+     * @return $this
+     */
     public function addPost(Post $post): self
     {
         if (!$this->posts->contains($post)) {
@@ -232,6 +288,11 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @param Post $post
+     *
+     * @return $this
+     */
     public function removePost(Post $post): self
     {
         if ($this->posts->contains($post)) {
@@ -243,35 +304,5 @@ class User implements UserInterface
         }
 
         return $this;
-    }
-
-    /**
-     * Check if owner is Simple user
-     *
-     * @return bool
-     */
-    public function isSimpleUser(): bool
-    {
-        return in_array(UserRolesEnum::SIMPLE_USER, $this->getRoles());
-    }
-
-    /**
-     * Check if owner is Blogger
-     *
-     * @return bool
-     */
-    public function isBlogger(): bool
-    {
-        return in_array(UserRolesEnum::BLOGGER, $this->getRoles());
-    }
-
-    /**
-     * Check if owner is Admin
-     *
-     * @return bool
-     */
-    public function isAdmin(): bool
-    {
-        return in_array(UserRolesEnum::ADMIN, $this->getRoles());
     }
 }

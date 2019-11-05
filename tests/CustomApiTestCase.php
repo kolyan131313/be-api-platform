@@ -3,8 +3,18 @@
 namespace App\Tests;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
+use App\DataFixtures\MediaObjectFixtures;
 use App\DataFixtures\PostFixtures;
 use App\DataFixtures\UserFixtures;
+use App\DataFixtures\VerificationRequestFixtures;
+use App\Entity\MediaObject;
+use App\Entity\Post;
+use App\Entity\User;
+use App\Entity\VerificationRequest;
+use App\Repository\MediaObjectRepository;
+use App\Repository\PostRepository;
+use App\Repository\UserRepository;
+use App\Repository\VerificationRequestRepository;
 use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
 use Doctrine\Common\DataFixtures\Loader;
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
@@ -26,7 +36,7 @@ abstract class CustomApiTestCase extends ApiTestCase
     /**
      * @var EntityManagerInterface
      */
-    private $entityManager;
+    protected $entityManager;
 
     /**
      * Set up services before class
@@ -86,7 +96,9 @@ abstract class CustomApiTestCase extends ApiTestCase
     {
         return [
             new UserFixtures($passwordEncoder),
-            new PostFixtures()
+            new PostFixtures(),
+            new MediaObjectFixtures(),
+            new VerificationRequestFixtures()
         ];
     }
 
@@ -106,15 +118,15 @@ abstract class CustomApiTestCase extends ApiTestCase
             'password' => $password
         ]]);
 
-        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
-        $this->assertResponseHeaderSame('Content-type', 'application/json');
+        static::assertResponseStatusCodeSame(Response::HTTP_OK);
+        static::assertResponseHeaderSame('Content-type', 'application/json');
         $responseData = json_decode($result->getContent(), true);
 
         return $responseData['token'];
     }
 
     /**
-     * Send authorized request as SIMPLE_USER_ROLE
+     * Send authorized request as SIMPLE_USER role
      *
      * @param string $method
      * @param string $url
@@ -132,10 +144,104 @@ abstract class CustomApiTestCase extends ApiTestCase
     {
         $accessToken = $this->getBearerAccessToken(UserFixtures::SIMPLE_USER_EMAIL, UserFixtures::DEFAULT_PASSWORD);
 
+        return $this->sendAuthenticatedRequest($method, $url, $accessToken, $options);
+    }
+
+    /**
+     * Send authorized request as BLOGGER as blogger
+     *
+     * @param string $method
+     * @param string $url
+     * @param array $options
+     *
+     * @return ResponseInterface
+     *
+     * @throws TransportExceptionInterface
+     */
+    public function sendAuthenticatedRequestAsBlogger(
+        string $method,
+        string $url,
+        array $options = []
+    ): ResponseInterface
+    {
+        $accessToken = $this->getBearerAccessToken(UserFixtures::BLOGGER_USER_EMAIL, UserFixtures::DEFAULT_PASSWORD);
+
+        return $this->sendAuthenticatedRequest($method, $url, $accessToken, $options);
+    }
+
+    /**
+     * Send authorized request as BLOGGER as blogger
+     *
+     * @param string $method
+     * @param string $url
+     * @param array $options
+     *
+     * @return ResponseInterface
+     *
+     * @throws TransportExceptionInterface
+     */
+    public function sendAuthenticatedRequestAsAdmin(
+        string $method,
+        string $url,
+        array $options = []
+    ): ResponseInterface
+    {
+        $accessToken = $this->getBearerAccessToken(UserFixtures::ADMIN_USER_EMAIL, UserFixtures::DEFAULT_PASSWORD);
+
+        return $this->sendAuthenticatedRequest($method, $url, $accessToken, $options);
+    }
+
+    /**
+     * @param string $method
+     * @param string $url
+     * @param string $accessToken
+     * @param array $options
+     * @return Response|ResponseInterface
+     * @throws TransportExceptionInterface
+     */
+    private function sendAuthenticatedRequest(
+        string $method,
+        string $url,
+        string $accessToken,
+        array $options = []
+    ): ResponseInterface
+    {
         $options['headers'] = $options['headers'] ?? [];
         $options['headers']['Authorization'] = sprintf('Bearer %s', $accessToken);
         $options['headers']['Accept'] = 'application/json';
 
         return static::createClient()->request($method, $url, $options);
+    }
+
+    /**
+     * @return UserRepository
+     */
+    public function getUserRepository(): UserRepository
+    {
+        return $this->entityManager->getRepository(User::class);
+    }
+
+    /**
+     * @return PostRepository
+     */
+    public function getPostRepository(): PostRepository
+    {
+        return $this->entityManager->getRepository(Post::class);
+    }
+
+    /**
+     * @return VerificationRequestRepository
+     */
+    public function getVerificationRequestRepository(): VerificationRequestRepository
+    {
+        return $this->entityManager->getRepository(VerificationRequest::class);
+    }
+
+    /**
+     * @return MediaObjectRepository
+     */
+    public function getMediaObjectRepository(): MediaObjectRepository
+    {
+        return $this->entityManager->getRepository(MediaObject::class);
     }
 }

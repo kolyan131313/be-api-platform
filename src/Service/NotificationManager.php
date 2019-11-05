@@ -3,10 +3,8 @@
 namespace App\Service;
 
 use App\Entity\VerificationRequest;
-use App\Enum\VerificationStatusEnum;
+use App\Factory\EmailMessageFactory;
 use Swift_Mailer;
-use Swift_Message;
-use Symfony\Component\Templating\EngineInterface;
 
 class NotificationManager
 {
@@ -16,14 +14,14 @@ class NotificationManager
     private $mailer;
 
     /**
-     * @var EngineInterface
+     * @var EmailMessageFactory
      */
-    private $templating;
+    private $emailMessageFactory;
 
-    public function __construct(Swift_Mailer $mailer, EngineInterface $templating)
+    public function __construct(Swift_Mailer $mailer, EmailMessageFactory $emailMessageFactory)
     {
         $this->mailer = $mailer;
-        $this->templating = $templating;
+        $this->emailMessageFactory = $emailMessageFactory;
     }
 
     /**
@@ -35,18 +33,7 @@ class NotificationManager
      */
     public function notifyOnRequestStatusFinalized(VerificationRequest $verificationRequest): void
     {
-        $notificationTemplate = $this->templating->render(
-            'email/verified-request-processed.html.twig',
-            [
-                'verificationRequest' => $verificationRequest,
-                'status' => VerificationStatusEnum::getLabels()[$verificationRequest->getStatus()]
-            ]
-        );
-
-        $message = (new Swift_Message('Status update just happened!'))
-            ->setFrom('admin@example.com')
-            ->setTo($verificationRequest->getOwner()->getEmail())
-            ->setBody($notificationTemplate);
+        $message = $this->emailMessageFactory->makeFinalizeMessage($verificationRequest, 'Status update just happened!');
 
         $this->mailer->send($message);
     }

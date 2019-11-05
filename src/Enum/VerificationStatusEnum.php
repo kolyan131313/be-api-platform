@@ -8,7 +8,12 @@ class VerificationStatusEnum
     public const APPROVED = 1;
     public const DECLINED = 2;
 
-    public static function getLabels(): array
+    /**
+     * Labels for statuses
+     *
+     * @return array
+     */
+    public function getLabels(): array
     {
         return [
             self::VERIFICATION_REQUESTED => 'Verification requested',
@@ -24,7 +29,7 @@ class VerificationStatusEnum
      *
      * @return bool
      */
-    public static function isFinishedStatus(int $status): bool
+    public function isFinishedStatus(int $status): bool
     {
         return in_array($status, [self::APPROVED, self::DECLINED]);
     }

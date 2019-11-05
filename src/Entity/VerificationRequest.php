@@ -14,8 +14,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
-use App\Controller\VerificationRequest\actions\ApproveVerificationRequestAction;
-use App\Controller\VerificationRequest\actions\DeclineVerificationRequestAction;
+use App\Controller\VerificationRequest\ApproveVerificationRequestAction;
+use App\Controller\VerificationRequest\DeclineVerificationRequestAction;
 
 /**
  * @ApiResource(
@@ -82,6 +82,7 @@ class VerificationRequest
      * @ORM\Id()
      * @ORM\GeneratedValue()
      * @ORM\Column(type="integer")
+     * @Groups({"verifiaction_request:read"})
      */
     private $id;
 
@@ -110,12 +111,12 @@ class VerificationRequest
 
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
-     * @Groups({"verifiaction_request:decline", "verifiaction_request:read"})
+     * @Groups({"verifiaction_request:decline"})
      */
     private $rejectionReason;
 
     /**
-     * @ORM\OneToOne(targetEntity="App\Entity\User", inversedBy="verificationRequest", cascade={"persist", "remove"})
+     * @ORM\ManyToOne(targetEntity="App\Entity\User", inversedBy="verificationRequest", cascade={"persist", "remove"})
      * @ORM\JoinColumn(nullable=false)
      * @Groups({"verifiaction_request:read"})
      * @Gedmo\Blameable(on="create")
@@ -127,16 +128,27 @@ class VerificationRequest
         $this->status = VerificationStatusEnum::VERIFICATION_REQUESTED;
     }
 
+    /**
+     * @return int|null
+     */
     public function getId(): ?int
     {
         return $this->id;
     }
 
+    /**
+     * @return int|null
+     */
     public function getStatus(): ?int
     {
         return $this->status;
     }
 
+    /**
+     * @param int $status
+     *
+     * @return $this
+     */
     public function setStatus(int $status): self
     {
         $this->status = $status;
@@ -144,11 +156,19 @@ class VerificationRequest
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getMessage(): ?string
     {
         return $this->message;
     }
 
+    /**
+     * @param string $message
+     *
+     * @return $this
+     */
     public function setMessage(string $message): self
     {
         $this->message = $message;
@@ -156,11 +176,19 @@ class VerificationRequest
         return $this;
     }
 
+    /**
+     * @return MediaObject|null
+     */
     public function getImage(): ?MediaObject
     {
         return $this->image;
     }
 
+    /**
+     * @param MediaObject $image
+     *
+     * @return $this
+     */
     public function setImage(MediaObject $image): self
     {
         $this->image = $image;
@@ -168,11 +196,19 @@ class VerificationRequest
         return $this;
     }
 
+    /**
+     * @return User|null
+     */
     public function getOwner(): ?User
     {
         return $this->owner;
     }
 
+    /**
+     * @param User $owner
+     *
+     * @return $this
+     */
     public function setOwner(User $owner): self
     {
         $this->owner = $owner;
@@ -180,11 +216,19 @@ class VerificationRequest
         return $this;
     }
 
+    /**
+     * @return string|null
+     */
     public function getRejectionReason(): ?string
     {
         return $this->rejectionReason;
     }
 
+    /**
+     * @param string|null $rejectionReason
+     *
+     * @return $this
+     */
     public function setRejectionReason(?string $rejectionReason): self
     {
         $this->rejectionReason = $rejectionReason;

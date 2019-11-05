@@ -23,47 +23,24 @@ services:
         resource: '../src/Controller'
         tags: ['controller.service_arguments']
 
+    App\Repository\:
+        resource: '../src/Repository'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    # Repositories
-    app.user.repository:
-        class: App\Repository\UserRepository
-        arguments:
-            - '@doctrine'
+    # Enums
+    App\Enum\UserRolesEnum: ~
+    App\Enum\VerificationStatusEnum: ~
 
-    app.verification_request.repository:
-        class: App\Repository\VerificationRequestRepository
-        arguments:
-            - '@doctrine'
+    # Factories
+    App\Factory\UserFactory: ~
+    App\Factory\EmailMessageFactory: ~
 
-    # Controllers
-    app.auth.controller:
-        class: App\Controller\AuthController
-        arguments:
-            - '@app.user.service'
+    # Services
+    App\Service\UserService: ~
+    App\Service\VerificationRequestService: ~
+    App\Service\NotificationManager: ~
 
-    #Services
-    app.notification_manager.service:
-        class: App\Service\NotificationManager
-        arguments:
-            - '@mailer'
-            - '@templating'
 
-    App\Service\NotificationManager: '@app.notification_manager.service'
-
-    app.user.service:
-        class: App\Service\UserService
-        arguments:
-            - '@security.password_encoder'
-            - '@app.user.repository'
-
-    app.verification_request.service:
-        class: App\Service\VerificationRequestService
-        arguments:
-            - '@app.user.repository'
-            - '@app.verification_request.repository'
-
-    App\Service\UserService: '@app.user.service'
-    App\Service\VerificationRequestService: '@app.verification_request.service'
 
