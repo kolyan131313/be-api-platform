@@ -5,9 +5,10 @@ namespace App\DataFixtures;
 use App\Entity\Post;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
-class PostFixtures extends Fixture
+class PostFixtures extends Fixture implements OrderedFixtureInterface
 {
     public const POSTS = [
         [
@@ -41,5 +42,13 @@ class PostFixtures extends Fixture
         }
 
         $manager->flush();
+    }
+
+    /**
+     * @return int
+     */
+    public function getOrder(): int
+    {
+        return 3;
     }
 }

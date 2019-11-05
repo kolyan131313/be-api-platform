@@ -4,9 +4,10 @@ namespace App\DataFixtures;
 
 use App\Entity\MediaObject;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
-class MediaObjectFixtures extends Fixture
+class MediaObjectFixtures extends Fixture implements OrderedFixtureInterface
 {
     public const MEDIA_REFERENCE = 'media';
     private const MEDIA_OBJECTS = [
@@ -36,5 +37,13 @@ class MediaObjectFixtures extends Fixture
         }
 
         $manager->flush();
+    }
+
+    /**
+     * @return int
+     */
+    public function getOrder(): int
+    {
+        return 2;
     }
 }

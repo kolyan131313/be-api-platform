@@ -7,10 +7,10 @@ use App\Entity\User;
 use App\Entity\VerificationRequest;
 use App\Enum\VerificationStatusEnum;
 use Doctrine\Bundle\FixturesBundle\Fixture;
-use Doctrine\Common\DataFixtures\DependentFixtureInterface;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 
-class VerificationRequestFixtures extends Fixture implements DependentFixtureInterface
+class VerificationRequestFixtures extends Fixture implements OrderedFixtureInterface
 {
     public const VERIFICATION_REQUESTS = [
         [
@@ -54,13 +54,10 @@ class VerificationRequestFixtures extends Fixture implements DependentFixtureInt
     }
 
     /**
-     * @return array
+     * @return int
      */
-    public function getDependencies(): array
+    public function getOrder(): int
     {
-        return array(
-//            UserFixtures::class,
-            MediaObjectFixtures::class
-        );
+        return 4;
     }
 }

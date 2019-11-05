@@ -5,10 +5,11 @@ namespace App\DataFixtures;
 use App\Entity\User;
 use App\Enum\UserRolesEnum;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Common\Persistence\ObjectManager;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
-class UserFixtures extends Fixture
+class UserFixtures extends Fixture implements OrderedFixtureInterface
 {
     public const USER_REFERENCE = 'user';
     public const DEFAULT_PASSWORD = 'secret12345';
@@ -70,5 +71,13 @@ class UserFixtures extends Fixture
         }
 
         $manager->flush();
+    }
+
+    /**
+     * @return int
+     */
+    public function getOrder(): int
+    {
+        return 1;
     }
 }
