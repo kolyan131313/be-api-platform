@@ -9,22 +9,29 @@ use Symfony\Component\Templating\EngineInterface;
 
 class EmailMessageFactory
 {
-    private const EMAIL_SENDER = 'admin@example.com';
-
     /**
      * @var EngineInterface
      */
     private $templating;
 
     /**
+     * @var string
+     */
+    private $emailSender;
+
+    /**
      * @var VerificationStatusEnum
      */
     private $verificationStatusEnum;
 
-    public function __construct(EngineInterface $templating, VerificationStatusEnum $verificationStatusEnum)
-    {
+    public function __construct(
+        EngineInterface $templating,
+        VerificationStatusEnum $verificationStatusEnum,
+        string $emailSender
+    ) {
         $this->templating = $templating;
         $this->verificationStatusEnum = $verificationStatusEnum;
+        $this->emailSender = $emailSender;
     }
 
     /**
@@ -44,7 +51,7 @@ class EmailMessageFactory
         );
 
         return (new Swift_Message($subject))
-            ->setFrom(self::EMAIL_SENDER)
+            ->setFrom($this->emailSender)
             ->setTo($verificationRequest->getOwner()->getEmail())
             ->setBody($notificationTemplate);
     }

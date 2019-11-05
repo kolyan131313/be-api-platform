@@ -35,7 +35,9 @@ services:
 
     # Factories
     App\Factory\UserFactory: ~
-    App\Factory\EmailMessageFactory: ~
+    App\Factory\EmailMessageFactory:
+        arguments:
+            $emailSender: 'admin@example.com'
 
     # Services
     App\Service\UserService: ~
