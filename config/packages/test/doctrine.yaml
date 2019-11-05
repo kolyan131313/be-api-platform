@@ -4,7 +4,7 @@ doctrine:
         user:      db_user
         password:  db_pwd
         charset:   UTF8
-        path: kernel.project_dir%/var/data.db
+        path: '%kernel.project_dir%/var/data_test.db'
     orm:
         auto_generate_proxy_classes: true
         naming_strategy: doctrine.orm.naming_strategy.underscore
