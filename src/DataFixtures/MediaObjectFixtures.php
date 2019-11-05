@@ -20,6 +20,15 @@ class MediaObjectFixtures extends Fixture implements OrderedFixtureInterface
         [
             'image' => 'test_img3.pmg'
         ],
+        [
+            'image' => 'test_img4.pmg'
+        ],
+        [
+            'image' => 'test_img5.pmg'
+        ],
+        [
+            'image' => 'test_img6.pmg'
+        ],
     ];
 
     /**

@@ -2,8 +2,10 @@
 
 namespace App\Tests;
 
+use App\DataFixtures\UserFixtures;
 use App\Entity\MediaObject;
 use App\Entity\VerificationRequest;
+use App\Enum\UserRolesEnum;
 use App\Enum\VerificationStatusEnum;
 use App\Repository\VerificationRequestRepository;
 use Symfony\Component\HttpFoundation\Request;
@@ -58,21 +60,22 @@ class VerificationRequestTest extends CustomApiTestCase
      */
     public function testUserCanEditVerificationRequest(): void
     {
-        /** @var MediaObject[] $entities */
-        $entities = $this->getMediaObjectRepository()->findAll();
-        /** @var MediaObject $lastMediaObject */
-        $lastMediaObject = $entities[count($entities) - 1];
+        /** @var VerificationRequest[] $entities */
+        $entities = $this->getVerificationRequestRepository()->getRequestOfUserByEmailAndStatus(
+            VerificationStatusEnum::VERIFICATION_REQUESTED,
+            UserFixtures::SIMPLE_USER_EMAIL
+        );
 
-        /** @var VerificationRequest $verificationRequest */
-        $verificationRequest = $this->getVerificationRequestRepository()->findOneBy([
-            'status' => VerificationStatusEnum::VERIFICATION_REQUESTED
-        ]);
+        $sendUserVerificationRequest = $entities[0];
 
-        $sourceLink = '/api/media-objects/' . $lastMediaObject->getId();
+        $files = $this->getMediaObjectRepository()->findAll();
+        /** @var MediaObject $firstMediaObject */
+        $firstMediaObject = $files[count($files) - 1];
+        $sourceLink = '/api/media-objects/' . $firstMediaObject->getId();
 
         $result = $this->sendAuthenticatedRequestAsSimpleUser(
             Request::METHOD_PUT,
-            sprintf('/api/verification-requests/%d', $verificationRequest->getId()),
+            sprintf('/api/verification-requests/%d', $sendUserVerificationRequest->getId()),
             [
                 'json' => [
                     'image' => $sourceLink,
@@ -91,7 +94,7 @@ class VerificationRequestTest extends CustomApiTestCase
         $verificationRequest = $this->getVerificationRequestRepository()->find($responseData['id']);
 
         $this->assertEquals(VerificationStatusEnum::VERIFICATION_REQUESTED, $verificationRequest->getStatus());
-        $this->assertEquals($lastMediaObject->getId(), $verificationRequest->getImage()->getId());
+        $this->assertEquals($firstMediaObject->getId(), $verificationRequest->getImage()->getId());
     }
 
     /**
@@ -177,27 +180,94 @@ class VerificationRequestTest extends CustomApiTestCase
     }
 
     /**
+     * @throws TransportExceptionInterface
+     */
+    public function testAdminCanApproveVerificationRequest(): void
+    {
+        /** @var VerificationRequest $sendUserVerificationRequest */
+        $sendUserVerificationRequest = $this->getVerificationRequestRepository()->findOneBy([
+            'status' => VerificationStatusEnum::VERIFICATION_REQUESTED
+        ]);
+
+        $this->sendAuthenticatedRequestAsAdmin(
+            Request::METHOD_PUT,
+            sprintf('/api/verification-requests/%d/approve', $sendUserVerificationRequest->getId()),
+            ['json' => []]
+        );
+
+        self::assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        $updatedVerificationRequest = $this->getVerificationRequestRepository()->find(
+            $sendUserVerificationRequest->getId()
+        );
+
+        $this->assertEquals(VerificationStatusEnum::APPROVED, $updatedVerificationRequest->getStatus());
+        $this->assertContains(UserRolesEnum::BLOGGER, $updatedVerificationRequest->getOwner()->getRoles());
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     */
+    public function testSimpleUserCantApproveVerificationRequest(): void
+    {
+        /** @var VerificationRequest $sendUserVerificationRequest */
+        $sendUserVerificationRequest = $this->getVerificationRequestRepository()->findOneBy([
+            'status' => VerificationStatusEnum::VERIFICATION_REQUESTED
+        ]);
+
+        $this->sendAuthenticatedRequestAsSimpleUser(
+            Request::METHOD_PUT,
+            sprintf('/api/verification-requests/%d/approve', $sendUserVerificationRequest->getId()),
+            ['json' => []]
+        );
+
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+    }
+
+    /**
      * @dataProvider deniedStatusesForEdit
      *
      * @throws TransportExceptionInterface
      */
-//    public function testAdminCanApproveVerificationRequest(): void
-//    {
-//        /** @var VerificationRequest $verificationRequest */
-//        $verificationRequest = $this->getVerificationRequestRepository()->findOneBy([
-//            'status' => VerificationStatusEnum::VERIFICATION_REQUESTED
-//        ]);
-//
-//        $this->sendAuthenticatedRequestAsAdmin(
-//            Request::METHOD_PUT,
-//            sprintf('/api/verification-requests/%d/approve', $verificationRequest->getId())
-//        );
-//
-//        self::assertResponseStatusCodeSame(Response::HTTP_OK);
-//
-//        $updatedVerificationRequest = $this->getVerificationRequestRepository()->find($verificationRequest->getId());
-//
-//        $this->assertEquals(VerificationStatusEnum::APPROVED, $updatedVerificationRequest->getStatus());
-//        $this->assertContains(UserRolesEnum::BLOGGER, $updatedVerificationRequest->getOwner()->getRoles());
-//    }
+    public function testAdminCanDeclineVerificationRequest(): void
+    {
+        /** @var VerificationRequest $sendUserVerificationRequest */
+        $sendUserVerificationRequest = $this->getVerificationRequestRepository()->findOneBy([
+            'status' => VerificationStatusEnum::VERIFICATION_REQUESTED
+        ]);
+
+        $this->sendAuthenticatedRequestAsAdmin(
+            Request::METHOD_PUT,
+            sprintf('/api/verification-requests/%d/decline', $sendUserVerificationRequest->getId()),
+            ['json' => []]
+        );
+
+        self::assertResponseStatusCodeSame(Response::HTTP_OK);
+
+        $updatedVerificationRequest = $this->getVerificationRequestRepository()->find(
+            $sendUserVerificationRequest->getId()
+        );
+
+        $this->assertEquals(VerificationStatusEnum::DECLINED, $updatedVerificationRequest->getStatus());
+        $this->assertContains(UserRolesEnum::SIMPLE_USER, $updatedVerificationRequest->getOwner()->getRoles());
+    }
+
+    /**
+     * @throws TransportExceptionInterface
+     */
+    public function testSimpleUserCantDeclineVerificationRequest(): void
+    {
+        /** @var VerificationRequest $sendUserVerificationRequest */
+        $sendUserVerificationRequest = $this->getVerificationRequestRepository()->findOneBy([
+            'status' => VerificationStatusEnum::VERIFICATION_REQUESTED
+        ]);
+
+        $this->sendAuthenticatedRequestAsSimpleUser(
+            Request::METHOD_PUT,
+            sprintf('/api/verification-requests/%d/decline', $sendUserVerificationRequest->getId()),
+            ['json' => []]
+        );
+
+        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
+    }
 }

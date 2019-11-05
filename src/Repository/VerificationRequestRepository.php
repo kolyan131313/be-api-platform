@@ -18,4 +18,25 @@ class VerificationRequestRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, VerificationRequest::class);
     }
+
+    /**
+     * Get verification request by email and status
+     *
+     * @param int $status
+     * @param string $email
+     *
+     * @return array
+     */
+    public function getRequestOfUserByEmailAndStatus(int $status, string $email = null): array
+    {
+        return $this->createQueryBuilder('vr')
+            ->join('vr.owner', 'u')
+            ->where('vr.status = :status')
+            ->setParameter('status', $status)
+            ->andWhere('u.email = :email')
+            ->setParameter('email', $email)
+            ->orderBy('vr.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

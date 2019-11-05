@@ -14,15 +14,30 @@ class VerificationRequestFixtures extends Fixture implements OrderedFixtureInter
 {
     public const VERIFICATION_REQUESTS = [
         [
-            'status' => VerificationStatusEnum::APPROVED,
+            'status' => VerificationStatusEnum::VERIFICATION_REQUESTED,
             'message' => 'Test message 1',
+            'rejectionReason' => 'Bad request'
+        ],
+        [
+            'status' => VerificationStatusEnum::VERIFICATION_REQUESTED,
+            'message' => 'Test message 2',
+            'rejectionReason' => 'Bad request'
+        ],
+        [
+            'status' => VerificationStatusEnum::VERIFICATION_REQUESTED,
+            'message' => 'Test message 3',
+            'rejectionReason' => 'Bad request'
+        ],
+        [
+            'status' => VerificationStatusEnum::APPROVED,
+            'message' => 'Test message 4',
             'rejectionReason' => ''
         ],
         [
             'status' => VerificationStatusEnum::DECLINED,
-            'message' => 'Test message 2',
+            'message' => 'Test message 5',
             'rejectionReason' => 'Bad request'
-        ]
+        ],
     ];
 
     /**
